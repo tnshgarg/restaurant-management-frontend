@@ -2,8 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { MenuItem } from '../types';
 import { Minus, Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 100;
 
 const MOCK_MENU_ITEMS: MenuItem[] = [
   {
@@ -42,175 +43,7 @@ const MOCK_MENU_ITEMS: MenuItem[] = [
       },
     ],
   },
-  // Pasta
-  {
-    id: '3',
-    name: 'Fettuccine Alfredo',
-    description: 'Creamy parmesan sauce with perfectly cooked fettuccine pasta',
-    price: 13.99,
-    category: 'Pasta',
-    image: 'https://images.unsplash.com/photo-1645112411341-6c4fd023714a',
-    available: true,
-    customizations: [
-      {
-        type: 'Add-ons',
-        options: [
-          { name: 'Grilled Chicken', price: 3 },
-          { name: 'Shrimp', price: 4 },
-        ],
-      },
-    ],
-  },
-  {
-    id: '4',
-    name: 'Spaghetti Bolognese',
-    description: 'Classic meat sauce made with premium ground beef and fresh herbs',
-    price: 12.99,
-    category: 'Pasta',
-    image: 'https://images.unsplash.com/photo-1622973536968-3ead9e780960',
-    available: true,
-  },
-  // Salads
-  {
-    id: '5',
-    name: 'Caesar Salad',
-    description: 'Crisp romaine lettuce, parmesan cheese, croutons, and our house-made Caesar dressing',
-    price: 9.99,
-    category: 'Salads',
-    image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9',
-    available: true,
-  },
-  {
-    id: '6',
-    name: 'Greek Salad',
-    description: 'Fresh cucumbers, tomatoes, olives, feta cheese with olive oil dressing',
-    price: 10.99,
-    category: 'Salads',
-    image: 'https://images.unsplash.com/photo-1515543237350-b3eea1ec8082',
-    available: true,
-  },
-  // Burgers
-  {
-    id: '7',
-    name: 'Classic Cheeseburger',
-    description: 'Angus beef patty, cheddar cheese, lettuce, tomato, and our special sauce',
-    price: 11.99,
-    category: 'Burgers',
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd',
-    available: true,
-    customizations: [
-      {
-        type: 'Add-ons',
-        options: [
-          { name: 'Bacon', price: 2 },
-          { name: 'Extra Cheese', price: 1 },
-        ],
-      },
-    ],
-  },
-  {
-    id: '8',
-    name: 'Mushroom Swiss Burger',
-    description: 'Sautéed mushrooms, Swiss cheese, caramelized onions on a brioche bun',
-    price: 13.99,
-    category: 'Burgers',
-    image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5',
-    available: false,
-  },
-  // Desserts
-  {
-    id: '9',
-    name: 'Tiramisu',
-    description: 'Classic Italian dessert with layers of coffee-soaked ladyfingers and mascarpone cream',
-    price: 7.99,
-    category: 'Desserts',
-    image: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9',
-    available: true,
-  },
-  {
-    id: '10',
-    name: 'Chocolate Lava Cake',
-    description: 'Warm chocolate cake with a molten center, served with vanilla ice cream',
-    price: 8.99,
-    category: 'Desserts',
-    image: 'https://images.unsplash.com/photo-1624353365286-3f8d62daad51',
-    available: true,
-  },
-  // Beverages
-  {
-    id: '11',
-    name: 'Fresh Lemonade',
-    description: 'Freshly squeezed lemons with just the right amount of sweetness',
-    price: 3.99,
-    category: 'Beverages',
-    image: 'https://images.unsplash.com/photo-1621263764928-df1444c5e859',
-    available: true,
-    customizations: [
-      {
-        type: 'Size',
-        options: [
-          { name: 'Regular', price: 0 },
-          { name: 'Large', price: 1 },
-        ],
-      },
-    ],
-  },
-  {
-    id: '12',
-    name: 'Iced Coffee',
-    description: 'Cold-brewed coffee served over ice with your choice of milk',
-    price: 4.99,
-    category: 'Beverages',
-    image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735',
-    available: true,
-    customizations: [
-      {
-        type: 'Add-ons',
-        options: [
-          { name: 'Extra Shot', price: 1 },
-          { name: 'Flavored Syrup', price: 0.5 },
-        ],
-      },
-    ],
-  },
-  // Appetizers
-  {
-    id: '13',
-    name: 'Garlic Bread',
-    description: 'Freshly baked bread with garlic butter and herbs',
-    price: 5.99,
-    category: 'Appetizers',
-    image: 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c',
-    available: true,
-  },
-  {
-    id: '14',
-    name: 'Mozzarella Sticks',
-    description: 'Crispy breaded mozzarella served with marinara sauce',
-    price: 6.99,
-    category: 'Appetizers',
-    image: 'https://images.unsplash.com/photo-1531749668029-257f2a5b93f8',
-    available: true,
-  },
-  // Sides
-  {
-    id: '15',
-    name: 'Sweet Potato Fries',
-    description: 'Crispy sweet potato fries seasoned with sea salt',
-    price: 4.99,
-    category: 'Sides',
-    image: 'https://images.unsplash.com/photo-1604182667775-44f47c88dbd5',
-    available: true,
-  },
-  {
-    id: '16',
-    name: 'Onion Rings',
-    description: 'Beer-battered onion rings with our signature dipping sauce',
-    price: 5.99,
-    category: 'Sides',
-    image: 'https://images.unsplash.com/photo-1639024471283-03518883512d',
-    available: true,
-  },
+  
   // Add more menu items as needed
 ];
 
@@ -219,27 +52,28 @@ const Menu: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const { addToCart, cart, updateQuantity, removeFromCart } = useStore();
+  const navigate = useNavigate();
 
   const categories = ['all', ...new Set(MOCK_MENU_ITEMS.map(item => item.category))];
 
   const filteredItems = useMemo(() => {
     let items = MOCK_MENU_ITEMS;
-    
+
     // Apply category filter
     if (selectedCategory !== 'all') {
       items = items.filter(item => item.category === selectedCategory);
     }
-    
+
     // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      items = items.filter(item => 
+      items = items.filter(item =>
         item.name.toLowerCase().includes(query) ||
         item.description.toLowerCase().includes(query) ||
         item.category.toLowerCase().includes(query)
       );
     }
-    
+
     return items;
   }, [selectedCategory, searchQuery]);
 
@@ -254,6 +88,8 @@ const Menu: React.FC = () => {
     const cartItem = cart.find(item => item.id === itemId);
     return cartItem?.quantity || 0;
   };
+
+  const totalItemsInCart = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleQuantityChange = (item: MenuItem, change: number) => {
     const currentQuantity = getItemQuantity(item.id);
@@ -421,6 +257,22 @@ const Menu: React.FC = () => {
           </>
         )}
       </div>
+
+      {totalItemsInCart > 0 && (
+        <div className="fixed bottom-0 inset-x-0 bg-indigo-600 text-white py-3 px-4 flex justify-between items-center z-50 shadow-lg md:hidden">
+          <div className="text-sm font-medium">
+            {totalItemsInCart} item{totalItemsInCart > 1 && 's'} in your cart
+          </div>
+          <button
+            className="bg-white text-indigo-600 px-4 py-2 rounded-full font-semibold text-sm hover:bg-gray-100 transition"
+            onClick={() => {
+              navigate("/cart")
+            }}
+          >
+            View Cart
+          </button>
+        </div>
+      )}
     </div>
   );
 };
