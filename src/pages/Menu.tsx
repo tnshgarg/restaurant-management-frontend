@@ -1,63 +1,68 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { MenuItem } from '../types';
+import { MenuItem } from '../types/index';
 import { Minus, Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { fetchMenu } from "../api/fetchMenu";
 
 const ITEMS_PER_PAGE = 100;
 
-const MOCK_MENU_ITEMS: MenuItem[] = [
-  {
-    id: '1',
-    name: 'Margherita Pizza',
-    description: 'Fresh tomatoes, mozzarella, basil, and olive oil',
-    price: 12.99,
-    category: 'Pizza',
-    image: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3',
-    available: true,
-    customizations: [
-      {
-        type: 'Size',
-        options: [
-          { name: 'Regular', price: 0 },
-          { name: 'Large', price: 4 },
-        ],
-      },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Pepperoni Supreme',
-    description: 'Double pepperoni, extra cheese, and our special herb-infused tomato sauce',
-    price: 14.99,
-    category: 'Pizza',
-    image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e',
-    available: true,
-    customizations: [
-      {
-        type: 'Size',
-        options: [
-          { name: 'Regular', price: 0 },
-          { name: 'Large', price: 4 },
-        ],
-      },
-    ],
-  },
+// const MOCK_MENU_ITEMS: MenuItem[] = [
+//   {
+//     id: '1',
+//     name: 'Margherita Pizza',
+//     description: 'Fresh tomatoes, mozzarella, basil, and olive oil',
+//     price: 12.99,
+//     category: 'Pizza',
+//     image: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3',
+//     available: true,
+//     customizations: [
+//       {
+//         type: 'Size',
+//         options: [
+//           { name: 'Regular', price: 0 },
+//           { name: 'Large', price: 4 },
+//         ],
+//       },
+//     ],
+//   },
+//   {
+//     id: '2',
+//     name: 'Pepperoni Supreme',
+//     description: 'Double pepperoni, extra cheese, and our special herb-infused tomato sauce',
+//     price: 14.99,
+//     category: 'Pizza',
+//     image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e',
+//     available: true,
+//     customizations: [
+//       {
+//         type: 'Size',
+//         options: [
+//           { name: 'Regular', price: 0 },
+//           { name: 'Large', price: 4 },
+//         ],
+//       },
+//     ],
+//   },
   
-  // Add more menu items as needed
-];
+//   // Add more menu items as needed
+// ];
 
 const Menu: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [menu, setMenu] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { addToCart, cart, updateQuantity, removeFromCart } = useStore();
   const navigate = useNavigate();
 
-  const categories = ['all', ...new Set(MOCK_MENU_ITEMS.map(item => item.category))];
+  const categories = ['all', ...new Set(menu.map(item => item.category))];
+  console.log(categories)
+
 
   const filteredItems = useMemo(() => {
-    let items = MOCK_MENU_ITEMS;
+    let items = menu;
 
     // Apply category filter
     if (selectedCategory !== 'all') {
@@ -103,6 +108,31 @@ const Menu: React.FC = () => {
       updateQuantity(item.id, newQuantity);
     }
   };
+
+  useEffect(() => {
+    async function loadMenu() {
+      const result = await fetchMenu();
+
+      if (result.success && result.data) {
+        console.log("Result: ", result.data)
+        setMenu(result.data);
+      } else {
+        console.error("Failed to fetch menu:", result.error);
+      }
+
+      setLoading(false);
+    }
+
+    loadMenu();
+  }, []);
+
+  useLayoutEffect(() => {
+    console.log("Menu State Updated: ", menu);
+  }, [menu]);
+
+  if (loading) {
+    return <div>Loading menu...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -171,7 +201,7 @@ const Menu: React.FC = () => {
                         alt={item.name}
                         className="w-full h-48 object-cover"
                       />
-                      {!item.available && (
+                      {!item.isAvailable && (
                         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                           <span className="text-white font-medium px-3 py-1 rounded-full bg-red-500">
                             Out of Stock
@@ -191,7 +221,7 @@ const Menu: React.FC = () => {
                       <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                         {item.description}
                       </p>
-                      {item.available ? (
+                      {item.isAvailable ? (
                         quantity > 0 ? (
                           <div className="flex items-center justify-center space-x-4">
                             <button

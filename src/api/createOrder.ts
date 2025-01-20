@@ -16,11 +16,12 @@ interface CreateOrderResponse {
   error?: string;
 }
 
-const API_BASE_URL = `${process.env.REACT_APP_API_URL}/api/orders`; // Replace with your backend URL
+const API_BASE_URL = `http://localhost:8000/api/orders`; // Replace with your backend URL
 
 export async function createOrder(orderData: CreateOrderRequest): Promise<CreateOrderResponse> {
   try {
     const response = await axios.post(API_BASE_URL, orderData);
+    console.log("Response: ", response)
     return {
       success: true,
       data: response.data,

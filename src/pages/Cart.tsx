@@ -1,34 +1,54 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Trash2 } from 'lucide-react';
-import { useStore } from '../store/useStore';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Trash2 } from "lucide-react";
+import { useStore } from "../store/useStore";
+import { createOrder } from "../api/createOrder";
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
   const { cart, removeFromCart, updateQuantity, clearCart, setOrderStatus } = useStore();
 
-  const subtotal = cart.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
+  const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.1; // 10% tax
   const total = subtotal + tax;
 
-  const handlePlaceOrder = () => {
-    // In a real app, this would make an API call
-    setOrderStatus('received');
-    clearCart();
-    navigate('/status');
+  const handlePlaceOrder = async () => {
+    if (cart.length === 0) {
+      return;
+    }
+
+    try {
+      const tableId = "T1"; // Replace this with the actual table ID, e.g., from the QR code
+      const orderData = {
+        tableId,
+        items: cart.map((item) => ({
+          menuItemId: item.id, // Assuming `id` matches the `menuItemId`
+          quantity: item.quantity,
+        })),
+      };
+
+      const response = await createOrder(orderData);
+
+      if (response.success) {
+        setOrderStatus("received");
+        clearCart();
+        navigate("/status");
+      } else {
+        console.error("Order creation failed:", response.error);
+        alert("Failed to place the order. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error placing the order:", error);
+      alert("An unexpected error occurred. Please try again.");
+    }
   };
 
   if (cart.length === 0) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-          Your cart is empty
-        </h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your cart is empty</h2>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
           className="text-indigo-600 hover:text-indigo-800"
         >
           Continue Shopping
@@ -43,10 +63,7 @@ const Cart: React.FC = () => {
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         {cart.map((item) => (
-          <div
-            key={item.id}
-            className="flex items-center py-4 border-b last:border-b-0"
-          >
+          <div key={item.id} className="flex items-center py-4 border-b last:border-b-0">
             <img
               src={item.image}
               alt={item.name}
