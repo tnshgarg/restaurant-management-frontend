@@ -22,7 +22,7 @@ const Cart: React.FC = () => {
       const orderData = {
         tableId,
         items: cart.map((item) => ({
-          menuItemId: item.id, // Assuming `id` matches the `menuItemId`
+          menuItemId: item._id, // Assuming `id` matches the `menuItemId`
           quantity: item.quantity,
         })),
       };
@@ -63,9 +63,9 @@ const Cart: React.FC = () => {
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         {cart.map((item) => (
-          <div key={item.id} className="flex items-center py-4 border-b last:border-b-0">
+          <div key={item._id} className="flex items-center py-4 border-b last:border-b-0">
             <img
-              src={item.image}
+              src={item.imageUrl}
               alt={item.name}
               className="w-20 h-20 object-cover rounded"
             />

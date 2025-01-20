@@ -4,7 +4,7 @@ export interface MenuItem {
   description: string;
   price: number;
   category: string;
-  image: string;
+  imageUrl: string;
   available: boolean;
   customizations?: {
     type: string;
@@ -17,10 +17,14 @@ export interface MenuItem {
 
 export interface CartItem extends MenuItem {
   quantity: number;
-  customizations: {
+  customizations?: {
     type: string;
-    selected: string;
-    extraPrice: number;
+    options: {
+      name: string;
+      price: number;
+    }[];
+    selected?: string;
+    extraPrice?: number;
   }[];
 }
 

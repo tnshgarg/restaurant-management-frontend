@@ -1,9 +1,10 @@
-import React, { useState, useMemo, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { MenuItem } from '../types/index';
 import { Minus, Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchMenu } from "../api/fetchMenu";
+import CryptoJS from "crypto-js"
 
 const ITEMS_PER_PAGE = 100;
 
@@ -49,6 +50,11 @@ const ITEMS_PER_PAGE = 100;
 // ];
 
 const Menu: React.FC = () => {
+  const route = useLocation();
+  const tableHash = route.pathname.split('/')[1];
+  const secretKey = "tanish"
+  const bytes = CryptoJS.AES.decrypt(tableHash, secretKey);
+  console.log(bytes.toString(CryptoJS.enc.Utf8))
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,11 +63,13 @@ const Menu: React.FC = () => {
   const { addToCart, cart, updateQuantity, removeFromCart } = useStore();
   const navigate = useNavigate();
 
-  const categories = ['all', ...new Set(menu.map(item => item.category))];
-  console.log(categories)
-
+  const categories = ['all', ...new Set(menu.map(item => item.category || 'all'))];
 
   const filteredItems = useMemo(() => {
+    if (selectedCategory === 'all' && !searchQuery) {
+      return menu;
+    }
+
     let items = menu;
 
     // Apply category filter
@@ -113,11 +121,11 @@ const Menu: React.FC = () => {
     async function loadMenu() {
       const result = await fetchMenu();
 
-      if (result.success && result.data) {
-        console.log("Result: ", result.data)
+      if (result.success && Array.isArray(result.data)) {
         setMenu(result.data);
       } else {
-        console.error("Failed to fetch menu:", result.error);
+        console.error("Failed to fetch or parse menu data.");
+        setMenu([]);
       }
 
       setLoading(false);
@@ -126,9 +134,9 @@ const Menu: React.FC = () => {
     loadMenu();
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     console.log("Menu State Updated: ", menu);
-  }, [menu]);
+  }, [menu, setMenu]);
 
   if (loading) {
     return <div>Loading menu...</div>;
